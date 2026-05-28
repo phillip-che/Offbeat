@@ -209,6 +209,12 @@ struct RoleRevealView: View {
                 .foregroundStyle(OB.Color.muted)
                 .padding(.top, 4)
 
+            if let hint = vm.impostorHint {
+                hintPill(text: hint)
+                    .padding(.top, 14)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
             Text("TAP TO HIDE")
                 .font(.system(size: 12, weight: .semibold))
                 .tracking(2.5)
@@ -216,5 +222,26 @@ struct RoleRevealView: View {
                 .padding(.top, 12)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Faint accent-bordered pill that surfaces the Impostor hint.
+    /// Only rendered when `hintLevel != .off`.
+    private func hintPill(text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(OB.Color.accent)
+            Text("HINT")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(2)
+                .foregroundStyle(OB.Color.accent)
+            Text(text)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(OB.Color.text)
+        }
+        .padding(.vertical, 9)
+        .padding(.horizontal, 14)
+        .background(Capsule().fill(OB.Color.accent.opacity(0.08)))
+        .overlay(Capsule().stroke(OB.Color.accent.opacity(0.45), lineWidth: 1))
     }
 }

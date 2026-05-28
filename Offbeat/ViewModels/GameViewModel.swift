@@ -18,6 +18,22 @@ final class GameViewModel: ObservableObject {
     // Theme rotation — exhaust the pool before reshuffling.
     private var themeQueue: [String] = []
 
+    // Hint level persisted across launches.
+    @AppStorage("hintLevel") private var storedHintLevel: String = HintLevel.off.rawValue
+    var hintLevel: HintLevel {
+        get { HintLevel(rawValue: storedHintLevel) ?? .off }
+        set {
+            storedHintLevel = newValue.rawValue
+            objectWillChange.send()
+        }
+    }
+
+    /// The hint string for the current session's theme, if hints are enabled.
+    var impostorHint: String? {
+        guard let theme = session?.theme else { return nil }
+        return Hints.text(for: theme, level: hintLevel)
+    }
+
     var isReadyToStart: Bool { players.count >= 3 }
     var canAddMore: Bool { players.count < 10 }
 

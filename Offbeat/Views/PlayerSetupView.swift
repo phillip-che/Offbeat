@@ -102,6 +102,15 @@ struct PlayerSetupView: View {
 
                 Spacer()
 
+                // Hint level — sits just above the CTA, persisted across launches.
+                HintLevelPicker(
+                    selection: Binding(
+                        get: { vm.hintLevel },
+                        set: { vm.hintLevel = $0 }
+                    )
+                )
+                .padding(.bottom, 16)
+
                 if !vm.isReadyToStart {
                     Text(hintText)
                         .font(.system(size: 14, weight: .medium))
