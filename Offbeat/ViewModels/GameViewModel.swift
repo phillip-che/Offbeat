@@ -18,6 +18,13 @@ final class GameViewModel: ObservableObject {
     // Theme rotation — exhaust the pool before reshuffling.
     private var themeQueue: [String] = []
 
+    // Source of truth for the theme pool + custom hints.
+    let themeStore: ThemeStore
+
+    init(themeStore: ThemeStore) {
+        self.themeStore = themeStore
+    }
+
     // Hint level persisted across launches.
     @AppStorage("hintLevel") private var storedHintLevel: String = HintLevel.off.rawValue
     var hintLevel: HintLevel {
@@ -29,9 +36,10 @@ final class GameViewModel: ObservableObject {
     }
 
     /// The hint string for the current session's theme, if hints are enabled.
+    /// Resolves customs first (via `ThemeStore`), then built-in defaults.
     var impostorHint: String? {
-        guard let theme = session?.theme else { return nil }
-        return Hints.text(for: theme, level: hintLevel)
+        guard hintLevel != .off, let theme = session?.theme else { return nil }
+        return themeStore.hint(for: theme)?.string(for: hintLevel)
     }
 
     var isReadyToStart: Bool { players.count >= 3 }
@@ -78,11 +86,21 @@ final class GameViewModel: ObservableObject {
         revealIndex = 0
     }
 
+    /// Pull from the user's active pool (defaults minus disabled + customs).
+    /// Falls back to a placeholder if the user disabled every theme.
     private func pullNextTheme() -> String {
+        let pool = themeStore.activePool
+        guard !pool.isEmpty else { return "Pick any song" }
         if themeQueue.isEmpty {
-            themeQueue = Themes.pool.shuffled()
+            themeQueue = pool.shuffled()
         }
         return themeQueue.removeFirst()
+    }
+
+    /// Called when the underlying theme pool changes mid-session, so the
+    /// next round picks from the freshest list.
+    func invalidateThemeQueue() {
+        themeQueue.removeAll()
     }
 
     // MARK: - Navigation helpers

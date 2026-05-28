@@ -2,12 +2,20 @@ import SwiftUI
 
 @main
 struct OffbeatApp: App {
-    @StateObject private var vm = GameViewModel()
+    @StateObject private var themeStore: ThemeStore
+    @StateObject private var vm: GameViewModel
+
+    init() {
+        let store = ThemeStore()
+        _themeStore = StateObject(wrappedValue: store)
+        _vm = StateObject(wrappedValue: GameViewModel(themeStore: store))
+    }
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(vm)
+                .environmentObject(themeStore)
                 .preferredColorScheme(.dark)
                 .tint(OB.Color.accent)
         }

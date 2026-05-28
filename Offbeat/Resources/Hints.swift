@@ -2,13 +2,14 @@ import Foundation
 
 /// The dimension a hint speaks to. Used to build the "Subtle" hint ("Think about mood.")
 /// and the "Generous" hint ("Mood: warm").
-enum HintDimension: String {
+enum HintDimension: String, CaseIterable, Identifiable, Codable {
     case mood    = "Mood"
     case energy  = "Energy"
     case setting = "Setting"
     case era     = "Era"
     case vibe    = "Vibe"
 
+    var id: String { rawValue }
     var lowered: String { rawValue.lowercased() }
 }
 

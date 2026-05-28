@@ -2,8 +2,10 @@ import SwiftUI
 
 struct PlayerSetupView: View {
     @EnvironmentObject var vm: GameViewModel
+    @EnvironmentObject var themeStore: ThemeStore
     @Environment(\.dismiss) private var dismiss
     @State private var draft = ""
+    @State private var showingThemes = false
     @FocusState private var fieldFocused: Bool
 
     var body: some View {
@@ -109,6 +111,28 @@ struct PlayerSetupView: View {
                         set: { vm.hintLevel = $0 }
                     )
                 )
+                .padding(.bottom, 12)
+
+                // Theme editor entry point — opens the management sheet.
+                Button {
+                    showingThemes = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Edit themes")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("· \(themeStore.activePool.count) active")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(OB.Color.faint)
+                    }
+                    .foregroundStyle(OB.Color.muted)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .background(Capsule().stroke(OB.Color.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
                 .padding(.bottom, 16)
 
                 if !vm.isReadyToStart {
@@ -122,12 +146,19 @@ struct PlayerSetupView: View {
                 PrimaryButton(
                     title: "Let's Play",
                     trailingChevron: true,
-                    enabled: vm.isReadyToStart
+                    enabled: vm.isReadyToStart && themeStore.canStartGame
                 ) {
                     vm.startGame()
                 }
             }
             .padding(.horizontal, 24)
+            .sheet(isPresented: $showingThemes) {
+                ThemeEditorView()
+                    .environmentObject(themeStore)
+                    .environmentObject(vm)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
             .padding(.bottom, 12)
         }
         .navigationBarBackButtonHidden()
